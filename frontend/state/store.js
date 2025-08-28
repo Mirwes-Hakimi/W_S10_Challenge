@@ -12,7 +12,7 @@ export const resetStore = () => configureStore({
   reducer: {
     example: exampleReducer,
    orders: ordersReducer, //the pizza order history from the backend
-   filterReducer, // the size filter state (s/m/l/all)
+   filter: filterReducer, // the size filter state (s/m/l/all)
 
   },
   middleware: getDefault => getDefault().concat(
