@@ -1,5 +1,6 @@
-import { createAsyncThunk, createSlice, isRejectedWithValue } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import { act } from "react-dom/test-utils";
 
 
 const initialState = {
@@ -13,9 +14,7 @@ export const fetchOrders = createAsyncThunk(
     'orders/fetchOrders',
     async () => {
         const response = await 
-        axios
-        // .get('http://localhost:9009/api/pizza/history');
-        .get('http://localhost:9009/api/pizza/history');
+        axios.get('http://localhost:9009/api/pizza/history');
         console.log('API response', response.data)
         return response.data;
     }
@@ -26,12 +25,12 @@ export const createOrder = createAsyncThunk(
     async (orderData, {dispatch, rejectWithValue}) => {
         try{
             const response = await axios.post('http://localhost:9009/api/pizza/order',orderData)
-                dispatch(fetchOrders());
+                dispatch(fetchOrders());/// after creating, it fetch the updated orders
                 return response.data;
             
         }catch(err){
             return rejectWithValue(err.response.data.message)
-        }
+        }// by using rejectWithValue pass the specific error messages string
     }
 )
 
@@ -42,6 +41,7 @@ const ordersSlice = createSlice({
     reducers: {},
     extraReducers: builder => {
         builder
+        /// cases for fetching orders
         .addCase(fetchOrders.pending, state => {
             state.loading = true;
             state.error = null;
@@ -54,15 +54,18 @@ const ordersSlice = createSlice({
 
         .addCase(fetchOrders.rejected, (state, action) => {
             state.loading = false;
-            state.error = action.error.message;
+            /// ensure it always store string for the error message
+            state.error = action.error.message || 'Faild to fetch orders.';
         })
         .addCase(createOrder.pending, state => {
             state.loading = true; /// makes message appear
             state.error = null;
         })
 
-        .addCase(createOrder.fulfilled, state => {
-            state.loading = false; /// make the message disappear
+        .addCase(createOrder.fulfilled,( state, action) => {
+           // do nothing here
+           // fetchOrders() will run, and that will set loading=true
+           // only fetchOrders.fulfilled will finally set loading=false
         })
 
         .addCase(createOrder.rejected, (state, action) => {
@@ -73,8 +76,4 @@ const ordersSlice = createSlice({
 });
 
 export default ordersSlice.reducer;
-
-
-
-
 
